@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk/global';
 import Lambda from 'aws-sdk/clients/lambda';
+import { STS } from 'aws-sdk';
 import { getInput, setOutput, setFailed } from '@actions/core';
 
 const apiVersion = '2015-03-31';
@@ -25,12 +26,20 @@ export enum Props {
   Qualifier = 'Qualifier',
 }
 
-const setAWSCredentials = () => {
-  AWS.config.credentials = {
-    accessKeyId: getInput(Credentials.AWS_ACCESS_KEY_ID),
-    secretAccessKey: getInput(Credentials.AWS_SECRET_ACCESS_KEY),
-    sessionToken: getInput(Credentials.AWS_SESSION_TOKEN),
-  };
+const setAWSCredentials = (assumedRoleCredentials: STS.AssumeRoleResponse['Credentials'] | undefined) => {
+  if (!assumedRoleCredentials) {
+    AWS.config.credentials = {
+      accessKeyId: getInput(Credentials.AWS_ACCESS_KEY_ID),
+      secretAccessKey: getInput(Credentials.AWS_SECRET_ACCESS_KEY),
+      sessionToken: getInput(Credentials.AWS_SESSION_TOKEN),
+    };
+  } else {
+    AWS.config.credentials = {
+      accessKeyId: assumedRoleCredentials.AccessKeyId,
+      secretAccessKey: assumedRoleCredentials.SecretAccessKey,
+      sessionToken: assumedRoleCredentials.SessionToken,
+    };
+  }
 };
 
 const getParams = () => {
@@ -56,7 +65,28 @@ const setAWSConfigOptions = () => {
 
 export const main = async () => {
   try {
-    setAWSCredentials();
+    let assumedRoleCredentials: STS.AssumeRoleResponse['Credentials'] | undefined;
+
+    if (getInput('ASSUMED_ROLE_ARN')) {
+      // Create STS client
+      const sts = new STS({
+        accessKeyId: getInput(Credentials.AWS_ACCESS_KEY_ID),
+        secretAccessKey: getInput(Credentials.AWS_SECRET_ACCESS_KEY),
+      });
+
+      // Assume role with STS
+      assumedRoleCredentials = (
+        await sts
+          .assumeRole({
+            RoleArn: getInput('ASSUMED_ROLE_ARN'),
+            RoleSessionName: 'DatabaseMigrationSession',
+            DurationSeconds: 1200,
+          })
+          .promise()
+      ).Credentials;
+    }
+
+    setAWSCredentials(assumedRoleCredentials);
 
     setAWSConfigOptions();
 

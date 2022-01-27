@@ -1,41 +1,44 @@
-name: "invoke-aws-lambda"
-description: "Invoke AWS Lambda function"
+name: 'invoke-aws-lambda'
+description: 'Invoke AWS Lambda function'
 branding:
   icon: arrow-up-right
   color: orange
 inputs:
   AWS_ACCESS_KEY_ID:
-    description: "AWS_ACCESS_KEY_ID"
+    description: 'AWS_ACCESS_KEY_ID'
     required: true
   AWS_SECRET_ACCESS_KEY:
-    description: "AWS_SECRET_ACCESS_KEY"
+    description: 'AWS_SECRET_ACCESS_KEY'
     required: true
   AWS_SESSION_TOKEN:
-    description: "AWS_SESSION_TOKEN"
+    description: 'AWS_SESSION_TOKEN'
+    required: false
+  ASSUMED_ROLE_ARN:
+    description: 'ASSUMED_ROLE_ARN'
     required: false
   REGION:
-    description: "region where the lambda has been created (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)"
+    description: 'region where the lambda has been created (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)'
     required: false
     default: us-east-1
   FunctionName:
-    description: "The name of the Lambda function, version, or alias"
+    description: 'The name of the Lambda function, version, or alias'
     required: true
   InvocationType:
-    description: "Choose from the following options: RequestResponse, Event, DryRun"
+    description: 'Choose from the following options: RequestResponse, Event, DryRun'
     required: false
     default: RequestResponse
   LogType:
-    description: "Choose from the following options: None, Tail"
+    description: 'Choose from the following options: None, Tail'
     required: false
     default: None
   ClientContext:
-    description: "Up to 3583 bytes of base64-encoded data about the invoking client to pass to the function in the context object."
+    description: 'Up to 3583 bytes of base64-encoded data about the invoking client to pass to the function in the context object.'
     required: false
   Payload:
-    description: "The JSON that you want to provide to your Lambda function as input. (Buffer, Typed Array, Blob, String)"
+    description: 'The JSON that you want to provide to your Lambda function as input. (Buffer, Typed Array, Blob, String)'
     required: false
   Qualifier:
-    description: "Specify a version or alias to invoke a published version of the function."
+    description: 'Specify a version or alias to invoke a published version of the function.'
     required: false
   HTTP_TIMEOUT:
     description: Sets the socket to timeout after timeout milliseconds of inactivity on the socket. Defaults to two minutes (120000)
@@ -48,7 +51,7 @@ inputs:
     required: false
 outputs:
   response: # id of output
-    description: "response from lambda invocation"
+    description: 'response from lambda invocation'
 runs:
-  using: "node12"
-  main: "dist/index.js"
+  using: 'node12'
+  main: 'dist/index.js'
